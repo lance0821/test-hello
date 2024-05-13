@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kaniko-executor
+spec:
+  containers:
+    - name: kaniko
+      image: gcr.io/kaniko-project/executor:latest
+      args:
+        [
+          '--dockerfile=Dockerfile',
+          '--context=dir://workspace',
+          '--destination=<region-key>.ocir.io/<tenancy-namespace>/<repo-name>/image-name:tag',
+        ]
+      volumeMounts:
+        - name: docker-config
+          mountPath: /kaniko/.docker/
+        - name: kaniko-storage
+          mountPath: /workspace
+  volumes:
+    - name: docker-config
+      secret:
+        secretName: ocir-secret
+    - name: kaniko-storage
+      persistentVolumeClaim:
+        claimName: kaniko-pvc
